@@ -163,18 +163,10 @@ export default function HomeScreen() {
   const [radius, setRadius] = useState(1000);
   const [selectedGroup, setSelectedGroup] = useState<GroupFilter>('Alles');
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [userListings, setUserListings] = useState<Listing[]>([]);
-  const [newName, setNewName] = useState('');
-  const [newKind, setNewKind] = useState('');
-  const [newDescription, setNewDescription] = useState('');
-  const [newProvider, setNewProvider] = useState('');
-  const [newGroup, setNewGroup] = useState<Group>('Producten');
 
   const query = search.trim().toLowerCase();
-const allListings = [...userListings, ...listings];
 
-  const results = allListings
+  const results = listings
     .filter((listing) => {
       const withinRadius = listing.distanceM <= radius;
       const matchesGroup =
@@ -197,165 +189,8 @@ const allListings = [...userListings, ...listings];
       );
     })
     .sort((a, b) => a.distanceM - b.distanceM);
-  function addListing() {
-    if (!newName.trim() || !newDescription.trim() || !newProvider.trim()) {
-      return;
-    }
 
-    const newListing: Listing = {
-      id: `demo-${Date.now()}`,
-      name: newName.trim(),
-      kind: newKind.trim() || newGroup,
-      group: newGroup,
-      description: newDescription.trim(),
-      provider: newProvider.trim(),
-      distanceM: 500,
-      icon:
-        newGroup === 'Producten'
-          ? '📦'
-          : newGroup === 'Diensten'
-            ? '🧰'
-            : newGroup === 'Activiteiten'
-              ? '🎟️'
-              : '🤝',
-      color: '#E6F3EE',
-      tags: [newName, newKind, newDescription, newProvider]
-        .join(' ')
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(Boolean),
-    };
-
-    setUserListings((current) => [newListing, ...current]);
-    setNewName('');
-    setNewKind('');
-    setNewDescription('');
-    setNewProvider('');
-    setSearch('');
-    setSelectedGroup('Alles');
-    setRadius(5000);
-    setShowAddForm(false);
-  }
-  if (showAddForm) {
-    const formIncomplete =
-      !newName.trim() || !newDescription.trim() || !newProvider.trim();
-
-    return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-        >
-          <Pressable
-            onPress={() => setShowAddForm(false)}
-            style={styles.backButton}
-          >
-            <Text style={styles.backText}>‹  Terug naar Ontdek</Text>
-          </Pressable>
-
-          <Text style={styles.eyebrow}>DEMO AANBIEDER</Text>
-          <Text style={styles.title}>Nieuw aanbod toevoegen</Text>
-          <Text style={styles.subtitle}>
-            Vul de gegevens in. Het aanbod verschijnt daarna in deze demo.
-          </Text>
-
-          <View style={[styles.searchBox, { marginTop: 18 }]}>
-            <TextInput
-              value={newName}
-              onChangeText={setNewName}
-              placeholder="Naam van het aanbod"
-              placeholderTextColor="#81908B"
-              style={styles.searchInput}
-            />
-          </View>
-
-          <View style={[styles.searchBox, { marginTop: 9 }]}>
-            <TextInput
-              value={newKind}
-              onChangeText={setNewKind}
-              placeholder="Soort, bijvoorbeeld glazenwasser"
-              placeholderTextColor="#81908B"
-              style={styles.searchInput}
-            />
-          </View>
-
-          <View style={[styles.searchBox, { marginTop: 9 }]}>
-            <TextInput
-              value={newDescription}
-              onChangeText={setNewDescription}
-              placeholder="Korte omschrijving"
-              placeholderTextColor="#81908B"
-              style={styles.searchInput}
-            />
-          </View>
-
-          <View style={[styles.searchBox, { marginTop: 9 }]}>
-            <TextInput
-              value={newProvider}
-              onChangeText={setNewProvider}
-              placeholder="Naam van de aanbieder"
-              placeholderTextColor="#81908B"
-              style={styles.searchInput}
-            />
-          </View>
-
-          <Text style={styles.controlLabel}>Soort aanbod</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-            {(
-              [
-                'Producten',
-                'Diensten',
-                'Activiteiten',
-                'Initiatieven',
-              ] as Group[]
-            ).map((group) => (
-              <Pressable
-                key={group}
-                onPress={() => setNewGroup(group)}
-                style={[
-                  styles.chip,
-                  newGroup === group && styles.chipActive,
-                  { marginBottom: 8 },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.chipText,
-                    newGroup === group && styles.chipTextActive,
-                  ]}
-                >
-                  {group}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          <Text style={styles.smallNote}>
-            Demo-aanbod wordt alleen tijdens deze app-sessie bewaard en krijgt
-            een fictieve afstand van 500 m.
-          </Text>
-
-          <Pressable
-            disabled={formIncomplete}
-            onPress={addListing}
-            style={[
-              styles.chipActive,
-              {
-                alignItems: 'center',
-                borderRadius: 16,
-                marginTop: 18,
-                opacity: formIncomplete ? 0.45 : 1,
-                paddingVertical: 14,
-              },
-            ]}
-          >
-            <Text style={styles.chipTextActive}>Aanbod toevoegen</Text>
-          </Pressable>
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }  
-if (selectedListing) {
+  if (selectedListing) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ScrollView contentContainerStyle={styles.content}>
@@ -422,21 +257,6 @@ if (selectedListing) {
         <Text style={styles.subtitle}>
           Zoek vrij in producten, diensten, activiteiten en initiatieven.
         </Text>
-        <Pressable
-          onPress={() => setShowAddForm(true)}
-          style={[
-            styles.chipActive,
-            {
-              alignSelf: 'flex-start',
-              borderRadius: 18,
-              marginTop: 14,
-              paddingHorizontal: 14,
-              paddingVertical: 10,
-            },
-          ]}
-        >
-          <Text style={styles.chipTextActive}>＋ Aanbod toevoegen (demo)</Text>
-        </Pressable>
 
         <View style={styles.searchBox}>
           <Text style={styles.searchIcon}>⌕</Text>
