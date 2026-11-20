@@ -281,7 +281,7 @@ export default function HomeScreen() {
       return (
         withinRadius &&
         matchesGroup &&
-        (!query || searchableText.includes(query))
+        (!query || query.split(/\s+/).every((term) => searchableText.includes(term)))
       );
     })
     .sort((a, b) => a.distanceM - b.distanceM);
