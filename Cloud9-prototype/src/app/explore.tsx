@@ -1,180 +1,257 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+const principles = [
+  {
+    number: '01',
+    icon: '⌖',
+    title: 'Ontdek wat dichtbij is',
+    description:
+      'Vind winkels, diensten, activiteiten en lokale initiatieven op één plek.',
+    color: '#E4F1E8',
+  },
+  {
+    number: '02',
+    icon: '◎',
+    title: 'Jij kiest wat je ziet',
+    description:
+      'Je bepaalt zelf welke onderwerpen en aanbiedingen bij je passen.',
+    color: '#E5EFF5',
+  },
+  {
+    number: '03',
+    icon: '↗',
+    title: 'Waarde blijft lokaal',
+    description:
+      'Het concept laat ruimte voor beloningen aan gebruikers en steun aan lokale initiatieven.',
+    color: '#F3EBDC',
+  },
+];
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-  const theme = useTheme();
-
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
-
+export default function ExploreScreen() {
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.topLine}>
+          <Text style={styles.eyebrow}>HET CLOUD9-CONCEPT</Text>
+          <View style={styles.demoBadge}>
+            <Text style={styles.demoBadgeText}>DEMO</Text>
+          </View>
+        </View>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
+        <Text style={styles.title}>Een buurtplatform op jouw voorwaarden.</Text>
+        <Text style={styles.intro}>
+          Cloud9 brengt lokaal aanbod en mensen samen, met aandacht voor
+          privacy en zeggenschap.
+        </Text>
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+        <View style={styles.featureCard}>
+          <View style={styles.cloudMark}>
+            <Text style={styles.cloudMarkText}>9</Text>
+          </View>
+          <Text style={styles.featureTitle}>Lokaal verbonden</Text>
+          <Text style={styles.featureText}>
+            Van een fijne plek om koffie te drinken tot een buurtinitiatief:
+            ontdek wat er om je heen gebeurt.
+          </Text>
+        </View>
 
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
+        <Text style={styles.sectionTitle}>Drie uitgangspunten</Text>
 
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+        {principles.map((principle) => (
+          <View key={principle.number} style={styles.principleCard}>
+            <View
+              style={[
+                styles.principleIcon,
+                { backgroundColor: principle.color },
+              ]}
+            >
+              <Text style={styles.principleIconText}>{principle.icon}</Text>
+            </View>
 
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+            <View style={styles.principleCopy}>
+              <Text style={styles.principleNumber}>{principle.number}</Text>
+              <Text style={styles.principleTitle}>{principle.title}</Text>
+              <Text style={styles.principleDescription}>
+                {principle.description}
+              </Text>
+            </View>
+          </View>
+        ))}
 
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+        <View style={styles.privacyCard}>
+          <Text style={styles.privacyTitle}>Privacy hoort bij het ontwerp</Text>
+          <Text style={styles.privacyText}>
+            Deze demo gebruikt voorbeeldgegevens. Je locatie wordt niet
+            opgevraagd en er worden geen advertenties getoond.
+          </Text>
+        </View>
+
+        <Text style={styles.footer}>
+          Cloud9 is nog in ontwikkeling. De functies en verdeling van waarde
+          moeten verder worden uitgewerkt.
+        </Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
+  safeArea: {
     flex: 1,
+    backgroundColor: '#F5F8F5',
   },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
-  },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
-  },
-  centerText: {
-    textAlign: 'center',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
-    gap: Spacing.one,
-    alignItems: 'center',
-  },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
+  content: {
     width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
+    maxWidth: 600,
     alignSelf: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 30,
+  },
+  topLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  eyebrow: {
+    color: '#278F7E',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.3,
+  },
+  demoBadge: {
+    backgroundColor: '#E6F3EE',
+    borderRadius: 10,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  demoBadgeText: {
+    color: '#287F70',
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  title: {
+    color: '#173B34',
+    fontSize: 29,
+    lineHeight: 35,
+    fontWeight: '800',
+  },
+  intro: {
+    color: '#64756F',
+    fontSize: 15,
+    lineHeight: 23,
+    marginTop: 10,
+  },
+  featureCard: {
+    backgroundColor: '#1C5147',
+    borderRadius: 22,
+    padding: 20,
+    marginTop: 23,
+  },
+  cloudMark: {
+    width: 42,
+    height: 42,
+    borderRadius: 15,
+    backgroundColor: '#2CB39D',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 17,
+  },
+  cloudMarkText: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: '800',
+  },
+  featureTitle: {
+    color: '#FFFFFF',
+    fontSize: 19,
+    fontWeight: '800',
+  },
+  featureText: {
+    color: '#E1F0EB',
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 7,
+  },
+  sectionTitle: {
+    color: '#193D36',
+    fontSize: 18,
+    fontWeight: '800',
+    marginTop: 27,
+    marginBottom: 4,
+  },
+  principleCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E8EEEA',
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 14,
+    marginTop: 11,
+  },
+  principleIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  principleIconText: {
+    color: '#27584E',
+    fontSize: 23,
+    fontWeight: '700',
+  },
+  principleCopy: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  principleNumber: {
+    color: '#278F7E',
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  principleTitle: {
+    color: '#1D4039',
+    fontSize: 14,
+    fontWeight: '800',
+    marginTop: 3,
+  },
+  principleDescription: {
+    color: '#687B74',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  privacyCard: {
+    backgroundColor: '#E6F3EE',
+    borderRadius: 18,
+    padding: 16,
+    marginTop: 18,
+  },
+  privacyTitle: {
+    color: '#20473E',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  privacyText: {
+    color: '#58736B',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 5,
+  },
+  footer: {
+    color: '#7B8D87',
+    fontSize: 11,
+    lineHeight: 17,
+    textAlign: 'center',
+    marginTop: 18,
   },
 });
