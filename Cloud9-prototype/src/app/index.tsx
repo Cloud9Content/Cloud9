@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as Location from 'expo-location';
 import {
   Pressable,
   ScrollView,
@@ -259,6 +260,36 @@ export default function HomeScreen() {
   const [radius, setRadius] = useState(1000);
   const [selectedGroup, setSelectedGroup] = useState<GroupFilter>('Alles');
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState('');
+
+  async function useMyLocation() {
+    if (locationLoading) {
+      return;
+    }
+
+    setLocationLoading(true);
+    setLocationError('');
+
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+
+      if (permission.status !== 'granted') {
+        setLocationError('Locatie niet gedeeld. Voorbeeldbuurt blijft actief.');
+        return;
+      }
+
+      const current = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      setLocation(current);
+    } catch {
+      setLocationError('Locatie niet beschikbaar. Voorbeeldbuurt blijft actief.');
+    } finally {
+      setLocationLoading(false);
+    }
+  }
 
   const query = search.trim().toLowerCase();
 
@@ -318,7 +349,7 @@ export default function HomeScreen() {
             <Text style={styles.detailValue}>{selectedListing.provider}</Text>
             <Text style={styles.detailLabel}>AFSTAND</Text>
             <Text style={styles.detailValue}>
-              {formatDistance(selectedListing.distanceM)} · Voorbeeldbuurt
+              {formatDistance(selectedListing.distanceM)} · {location ? 'Rondom jou' : 'Voorbeeldbuurt'}
             </Text>
           </View>
 
@@ -342,11 +373,29 @@ export default function HomeScreen() {
             <Text style={styles.logoMarkText}>9</Text>
           </View>
           <Text style={styles.logoName}>cloud9</Text>
-          <View style={styles.locationPill}>
+          <Pressable
+            onPress={() => { void useMyLocation(); }}
+            style={styles.locationPill}
+            disabled={locationLoading}
+          >
             <Text style={styles.locationDot}>●</Text>
-            <Text style={styles.locationText}>Voorbeeldbuurt</Text>
-          </View>
+            <Text style={styles.locationText}>
+              {locationLoading
+                ? 'Locatie…'
+                : location
+                  ? 'Rondom jou'
+                  : 'Voorbeeldbuurt'}
+            </Text>
+          </Pressable>
         </View>
+        <Text style={styles.smallNote}>
+          {location
+            ? 'Je locatie is het middelpunt; aanbod en afstanden zijn demo-gegevens.'
+            : 'Tik op Voorbeeldbuurt om je locatie te gebruiken.'}
+        </Text>
+        {locationError ? (
+          <Text style={styles.smallNote}>{locationError}</Text>
+        ) : null}
 
         <Text style={styles.eyebrow}>ONTDEK LOKAAL</Text>
         <Text style={styles.title}>Wat zoek je in de buurt?</Text>
