@@ -9,143 +9,230 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type Category =
-  | 'Eten & drinken'
-  | 'Winkels'
-  | 'Diensten'
-  | 'Activiteiten'
-  | 'Initiatieven';
+type Group = 'Producten' | 'Diensten' | 'Activiteiten' | 'Initiatieven';
+type GroupFilter = 'Alles' | Group;
 
-type Filter = 'Alles' | Category;
+type Listing = {
+  id: string;
+  name: string;
+  kind: string;
+  group: Group;
+  description: string;
+  provider: string;
+  distanceM: number;
+  icon: string;
+  color: string;
+  tags: string[];
+};
 
-const categories: Filter[] = [
+const groups: GroupFilter[] = [
   'Alles',
-  'Eten & drinken',
-  'Winkels',
+  'Producten',
   'Diensten',
   'Activiteiten',
   'Initiatieven',
 ];
 
-const places = [
+const radiusOptions = [
+  { label: '500 m', meters: 500 },
+  { label: '1 km', meters: 1000 },
+  { label: '3 km', meters: 3000 },
+  { label: '5 km', meters: 5000 },
+];
+
+const listings: Listing[] = [
   {
-    name: 'Koffiehoek',
-    category: 'Eten & drinken',
-    description: 'Koffie en iets lekkers uit de buurt',
-    icon: '☕',
-    color: '#F3EBDD',
+    id: 'audio',
+    name: 'TweedeKans Audio',
+    kind: 'Producten · audio',
+    group: 'Producten',
+    description: 'Gereviseerde koptelefoons en kleine audioapparatuur.',
+    provider: 'Voorbeeldwinkel',
+    distanceM: 420,
+    icon: '🎧',
+    color: '#E5EFF5',
+    tags: ['koptelefoon', 'hoofdtelefoon', 'audio', 'tweedehands', 'reparatie'],
   },
   {
-    name: 'Groene Markt',
-    category: 'Winkels',
-    description: 'Lokale producten en verse groenten',
-    icon: '🥬',
+    id: 'markt',
+    name: 'Buurtmarkt',
+    kind: 'Producten · markt',
+    group: 'Producten',
+    description: 'Groente, brood en producten van makers uit de omgeving.',
+    provider: 'Voorbeeldmarkt',
+    distanceM: 680,
+    icon: '🥕',
     color: '#E5F1E5',
+    tags: ['markt', 'groente', 'brood', 'lokaal', 'eten'],
   },
   {
-    name: 'Buurtatelier',
-    category: 'Activiteiten',
-    description: 'Creatieve workshops voor iedereen',
-    icon: '🎨',
-    color: '#F0E8F5',
-  },
-  {
-    name: 'Samen in de wijk',
-    category: 'Initiatieven',
-    description: 'Een idee van en voor de gemeenschap',
-    icon: '🌱',
-    color: '#E2F2EE',
-  },
-  {
-    name: 'Fietshulp',
-    category: 'Diensten',
-    description: 'Kleine reparaties en hulp met je fiets',
+    id: 'fiets',
+    name: 'Fietsservice aan huis',
+    kind: 'Dienst',
+    group: 'Diensten',
+    description: 'Kleine reparaties en onderhoud op afspraak.',
+    provider: 'Voorbeeldservice',
+    distanceM: 900,
     icon: '🚲',
     color: '#E8EEF8',
+    tags: ['fiets', 'fietsenmaker', 'reparatie', 'band', 'onderhoud'],
   },
-] satisfies {
-  name: string;
-  category: Category;
-  description: string;
-  icon: string;
-  color: string;
-}[];
+  {
+    id: 'repair-cafe',
+    name: 'Repaircafé Noord',
+    kind: 'Initiatief · reparatie',
+    group: 'Initiatieven',
+    description: 'Vrijwilligers helpen spullen samen repareren.',
+    provider: 'Voorbeeldinitiatief',
+    distanceM: 1450,
+    icon: '🛠️',
+    color: '#F3EBDD',
+    tags: ['repair café', 'repareren', 'vrijwilligers', 'duurzaam', 'herstel'],
+  },
+  {
+    id: 'kleding',
+    name: 'Kledingatelier Steekje',
+    kind: 'Dienst · kledingherstel',
+    group: 'Diensten',
+    description: 'Kleding verstellen, herstellen en laten innemen.',
+    provider: 'Voorbeeldatelier',
+    distanceM: 1850,
+    icon: '🧵',
+    color: '#F0E8F5',
+    tags: ['kleding', 'naaien', 'herstellen', 'reparatie', 'atelier'],
+  },
+  {
+    id: 'vrijwilligers',
+    name: 'Help mee in de buurttuin',
+    kind: 'Vrijwilligerswerk',
+    group: 'Initiatieven',
+    description: 'Samen tuinieren en de buurtplek onderhouden.',
+    provider: 'Voorbeeldbuurtinitiatief',
+    distanceM: 2100,
+    icon: '🌱',
+    color: '#E2F2EE',
+    tags: ['vrijwilligerswerk', 'tuin', 'natuur', 'buurt', 'helpen'],
+  },
+  {
+    id: 'workshop',
+    name: 'Keramiekatelier: open workshop',
+    kind: 'Activiteit · workshop',
+    group: 'Activiteiten',
+    description: 'Probeer klei draaien tijdens een introductieworkshop.',
+    provider: 'Voorbeeldatelier',
+    distanceM: 2600,
+    icon: '🏺',
+    color: '#F5E9D7',
+    tags: ['workshop', 'keramiek', 'klei', 'creatief', 'maken'],
+  },
+  {
+    id: 'sport',
+    name: 'Sportpark Rivierwijk',
+    kind: 'Activiteit · sport',
+    group: 'Activiteiten',
+    description: 'Lokale voetbalwedstrijd op het sportpark.',
+    provider: 'Voorbeeldvereniging',
+    distanceM: 3400,
+    icon: '⚽',
+    color: '#E5F1E5',
+    tags: ['voetbal', 'wedstrijd', 'sport', 'vereniging', 'publiek'],
+  },
+  {
+    id: 'theater',
+    name: 'Theater De Linde',
+    kind: 'Activiteit · theater',
+    group: 'Activiteiten',
+    description: 'Kleinschalige voorstelling van een lokaal gezelschap.',
+    provider: 'Voorbeeldtheater',
+    distanceM: 4300,
+    icon: '🎭',
+    color: '#F0E8F5',
+    tags: ['theater', 'voorstelling', 'cultuur', 'toneel', 'avond'],
+  },
+];
 
-type Place = (typeof places)[number];
+function formatDistance(distanceM: number) {
+  if (distanceM < 1000) {
+    return `${distanceM} m`;
+  }
+  return `${(distanceM / 1000).toFixed(1).replace('.', ',')} km`;
+}
 
 export default function HomeScreen() {
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<Filter>('Alles');
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [radius, setRadius] = useState(1000);
+  const [selectedGroup, setSelectedGroup] = useState<GroupFilter>('Alles');
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
-  if (selectedPlace) {
+  const query = search.trim().toLowerCase();
+
+  const results = listings
+    .filter((listing) => {
+      const withinRadius = listing.distanceM <= radius;
+      const matchesGroup =
+        selectedGroup === 'Alles' || listing.group === selectedGroup;
+      const searchableText = [
+        listing.name,
+        listing.kind,
+        listing.group,
+        listing.description,
+        listing.provider,
+        listing.tags.join(' '),
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      return (
+        withinRadius &&
+        matchesGroup &&
+        (!query || searchableText.includes(query))
+      );
+    })
+    .sort((a, b) => a.distanceM - b.distanceM);
+
+  if (selectedListing) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView contentContainerStyle={styles.content}>
           <Pressable
-            onPress={() => setSelectedPlace(null)}
+            onPress={() => setSelectedListing(null)}
             style={styles.backButton}
           >
-            <Text style={styles.backText}>‹  Terug naar aanbod</Text>
+            <Text style={styles.backText}>‹  Terug naar Ontdek</Text>
           </Pressable>
 
           <View
             style={[
               styles.detailHero,
-              { backgroundColor: selectedPlace.color },
+              { backgroundColor: selectedListing.color },
             ]}
           >
-            <Text style={styles.detailEmoji}>{selectedPlace.icon}</Text>
-            <Text style={styles.detailBadge}>
-              VOORBEELD · {selectedPlace.category.toUpperCase()}
-            </Text>
+            <Text style={styles.detailIcon}>{selectedListing.icon}</Text>
+            <Text style={styles.demoBadge}>VOORBEELD AANBOD</Text>
           </View>
 
-          <Text style={styles.detailTitle}>{selectedPlace.name}</Text>
+          <Text style={styles.detailKind}>{selectedListing.kind}</Text>
+          <Text style={styles.detailTitle}>{selectedListing.name}</Text>
           <Text style={styles.detailDescription}>
-            {selectedPlace.description}.
+            {selectedListing.description}
           </Text>
 
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>TYPE AANBOD</Text>
-            <Text style={styles.infoValue}>{selectedPlace.category}</Text>
-            <Text style={styles.infoSmall}>
-              Dit is voorbeeldinhoud, geen echte aanbieder.
+          <View style={styles.detailCard}>
+            <Text style={styles.detailLabel}>AANBIEDER</Text>
+            <Text style={styles.detailValue}>{selectedListing.provider}</Text>
+            <Text style={styles.detailLabel}>AFSTAND</Text>
+            <Text style={styles.detailValue}>
+              {formatDistance(selectedListing.distanceM)} · Voorbeeldbuurt
             </Text>
           </View>
 
-          <View style={styles.privacyCard}>
-            <View style={styles.privacyIcon}>
-              <Text style={styles.privacyCheck}>✓</Text>
-            </View>
-            <View style={styles.privacyCopy}>
-              <Text style={styles.privacyTitle}>Jij houdt de regie</Text>
-              <Text style={styles.privacyText}>
-                Deze demo gebruikt geen live locatie of persoonlijke gegevens.
-              </Text>
-            </View>
-          </View>
-
-          <Text style={styles.footerNote}>
-            Aanbieders en beschrijvingen zijn voorbeelden voor de demo.
+          <Text style={styles.smallNote}>
+            Dit is een fictief voorbeeld. De locatie en afstand zijn nagebootst.
           </Text>
         </ScrollView>
       </SafeAreaView>
     );
   }
-
-  const query = search.trim().toLowerCase();
-  const visiblePlaces = places.filter((place) => {
-    const matchesCategory =
-      selectedCategory === 'Alles' || place.category === selectedCategory;
-    const searchableText =
-      `${place.name} ${place.category} ${place.description}`.toLowerCase();
-
-    return matchesCategory && searchableText.includes(query);
-  });
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -165,10 +252,10 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <Text style={styles.eyebrow}>LOKAAL BEGINT HIER</Text>
-        <Text style={styles.title}>Wat ontdek je vandaag?</Text>
+        <Text style={styles.eyebrow}>ONTDEK LOKAAL</Text>
+        <Text style={styles.title}>Wat zoek je in de buurt?</Text>
         <Text style={styles.subtitle}>
-          Vind winkels, diensten en activiteiten bij jou in de buurt.
+          Zoek vrij in producten, diensten, activiteiten en initiatieven.
         </Text>
 
         <View style={styles.searchBox}>
@@ -176,54 +263,51 @@ export default function HomeScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Zoek lokaal aanbod"
+            placeholder="Bijv. repaircafé, workshop, fiets..."
             placeholderTextColor="#81908B"
             style={styles.searchInput}
             returnKeyType="search"
           />
         </View>
 
-        <View style={styles.privacyCard}>
-          <View style={styles.privacyIcon}>
-            <Text style={styles.privacyCheck}>✓</Text>
-          </View>
-          <View style={styles.privacyCopy}>
-            <Text style={styles.privacyTitle}>Jij houdt de regie</Text>
-            <Text style={styles.privacyText}>
-              Geen volgprofiel. Jij kiest wat je wilt zien.
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.sectionHeading}>
-          <Text style={styles.sectionTitle}>Ontdek lokaal</Text>
-          <Text style={styles.sectionHint}>VOORBEELD AANBOD</Text>
-        </View>
-
+        <Text style={styles.controlLabel}>Zoekradius</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryList}
+          contentContainerStyle={styles.chipList}
         >
-          {categories.map((category) => {
-            const isSelected = selectedCategory === category;
-
+          {radiusOptions.map((option) => {
+            const active = radius === option.meters;
             return (
               <Pressable
-                key={category}
-                onPress={() => setSelectedCategory(category)}
-                style={[
-                  styles.categoryChip,
-                  isSelected && styles.categoryChipSelected,
-                ]}
+                key={option.label}
+                onPress={() => setRadius(option.meters)}
+                style={[styles.chip, active && styles.chipActive]}
               >
-                <Text
-                  style={[
-                    styles.categoryText,
-                    isSelected && styles.categoryTextSelected,
-                  ]}
-                >
-                  {category}
+                <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                  {option.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        <Text style={styles.controlLabel}>Verfijn eventueel op soort</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipList}
+        >
+          {groups.map((group) => {
+            const active = selectedGroup === group;
+            return (
+              <Pressable
+                key={group}
+                onPress={() => setSelectedGroup(group)}
+                style={[styles.chip, active && styles.chipActive]}
+              >
+                <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                  {group}
                 </Text>
               </Pressable>
             );
@@ -231,47 +315,60 @@ export default function HomeScreen() {
         </ScrollView>
 
         <View style={styles.resultsHeading}>
-          <Text style={styles.sectionTitle}>In de buurt</Text>
-          <Text style={styles.resultCount}>
-            {visiblePlaces.length} voorbeelden
-          </Text>
+          <View>
+            <Text style={styles.sectionTitle}>Aanbod in de buurt</Text>
+            <Text style={styles.resultNote}>
+              {results.length} voorbeelden binnen {formatDistance(radius)}
+            </Text>
+          </View>
+          <Text style={styles.sortLabel}>Dichtstbij</Text>
         </View>
 
-        {visiblePlaces.length > 0 ? (
-          visiblePlaces.map((place) => (
+        {results.length > 0 ? (
+          results.map((listing) => (
             <Pressable
-              key={place.name}
-              onPress={() => setSelectedPlace(place)}
+              key={listing.id}
+              onPress={() => setSelectedListing(listing)}
               style={({ pressed }) => [
-                styles.placeCard,
-                pressed && styles.placeCardPressed,
+                styles.listingCard,
+                pressed && styles.listingPressed,
               ]}
             >
-              <View style={[styles.placeIcon, { backgroundColor: place.color }]}>
-                <Text style={styles.placeEmoji}>{place.icon}</Text>
+              <View
+                style={[
+                  styles.listingIcon,
+                  { backgroundColor: listing.color },
+                ]}
+              >
+                <Text style={styles.listingEmoji}>{listing.icon}</Text>
               </View>
 
-              <View style={styles.placeInfo}>
-                <View style={styles.placeTitleRow}>
-                  <Text style={styles.placeName}>{place.name}</Text>
-                  <Text style={styles.exampleBadge}>DEMO</Text>
+              <View style={styles.listingInfo}>
+                <View style={styles.listingTopLine}>
+                  <Text style={styles.listingName}>{listing.name}</Text>
+                  <Text style={styles.distance}>
+                    {formatDistance(listing.distanceM)}
+                  </Text>
                 </View>
-                <Text style={styles.placeDescription}>{place.description}</Text>
-                <Text style={styles.placeCategory}>{place.category}</Text>
+                <Text style={styles.listingKind}>{listing.kind}</Text>
+                <Text style={styles.listingDescription}>
+                  {listing.description}
+                </Text>
+                <Text style={styles.listingProvider}>{listing.provider}</Text>
               </View>
             </Pressable>
           ))
         ) : (
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>Niets gevonden</Text>
+            <Text style={styles.emptyTitle}>Geen aanbod gevonden</Text>
             <Text style={styles.emptyText}>
-              Probeer een andere zoekterm of categorie.
+              Vergroot de straal of probeer een andere zoekterm.
             </Text>
           </View>
         )}
 
         <Text style={styles.footerNote}>
-          Dit is een demo met voorbeeldgegevens. Je locatie wordt niet gebruikt.
+          Voorbeeldcatalogus · geen echte locatie gebruikt
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -279,10 +376,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5F8F5',
-  },
+  safeArea: { flex: 1, backgroundColor: '#F5F8F5' },
   content: {
     width: '100%',
     maxWidth: 600,
@@ -294,7 +388,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 28,
+    marginBottom: 26,
   },
   logoMark: {
     width: 38,
@@ -304,11 +398,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoMarkText: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '800',
-  },
+  logoMarkText: { color: '#FFFFFF', fontSize: 22, fontWeight: '800' },
   logoName: {
     marginLeft: 9,
     color: '#183D36',
@@ -324,16 +414,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 9,
   },
-  locationDot: {
-    color: '#25A995',
-    fontSize: 9,
-    marginRight: 7,
-  },
-  locationText: {
-    color: '#35564F',
-    fontSize: 12,
-    fontWeight: '600',
-  },
+  locationDot: { color: '#25A995', fontSize: 9, marginRight: 7 },
+  locationText: { color: '#35564F', fontSize: 12, fontWeight: '600' },
   eyebrow: {
     color: '#278F7E',
     fontSize: 11,
@@ -343,14 +425,14 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#173B34',
-    fontSize: 29,
-    lineHeight: 35,
+    fontSize: 28,
+    lineHeight: 34,
     fontWeight: '800',
   },
   subtitle: {
     color: '#64756F',
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 14,
+    lineHeight: 21,
     marginTop: 7,
   },
   searchBox: {
@@ -358,11 +440,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderColor: '#E1EAE5',
+    borderColor: '#DDE8E2',
     borderWidth: 1,
     borderRadius: 16,
     paddingHorizontal: 14,
-    marginTop: 19,
+    marginTop: 18,
   },
   searchIcon: {
     color: '#278F7E',
@@ -370,176 +452,96 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginTop: -3,
   },
-  searchInput: {
-    flex: 1,
-    color: '#193D36',
-    fontSize: 15,
-  },
-  privacyCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E6F3EE',
-    borderRadius: 17,
-    padding: 14,
-    marginTop: 13,
-  },
-  privacyIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    backgroundColor: '#D0EAE1',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 11,
-  },
-  privacyCheck: {
-    color: '#197B6C',
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  privacyCopy: {
-    flex: 1,
-  },
-  privacyTitle: {
-    color: '#20473E',
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  privacyText: {
-    color: '#58736B',
+  searchInput: { flex: 1, color: '#193D36', fontSize: 14 },
+  controlLabel: {
+    color: '#46645C',
     fontSize: 12,
-    lineHeight: 17,
-    marginTop: 2,
+    fontWeight: '700',
+    marginTop: 18,
+    marginBottom: 9,
   },
-  sectionHeading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 27,
-    marginBottom: 13,
-  },
-  sectionTitle: {
-    color: '#193D36',
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  sectionHint: {
-    color: '#789088',
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  categoryList: {
-    paddingRight: 20,
-  },
-  categoryChip: {
+  chipList: { paddingRight: 20 },
+  chip: {
     backgroundColor: '#FFFFFF',
     borderColor: '#E1EAE5',
     borderWidth: 1,
     borderRadius: 22,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
     marginRight: 8,
   },
-  categoryChipSelected: {
-    backgroundColor: '#1C5147',
-    borderColor: '#1C5147',
-  },
-  categoryText: {
-    color: '#46645C',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  categoryTextSelected: {
-    color: '#FFFFFF',
-  },
+  chipActive: { backgroundColor: '#1C5147', borderColor: '#1C5147' },
+  chipText: { color: '#46645C', fontSize: 11, fontWeight: '700' },
+  chipTextActive: { color: '#FFFFFF' },
   resultsHeading: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 24,
-    marginBottom: 3,
+    marginTop: 25,
+    marginBottom: 4,
   },
-  resultCount: {
-    color: '#7B8D87',
-    fontSize: 12,
-  },
-  placeCard: {
+  sectionTitle: { color: '#193D36', fontSize: 18, fontWeight: '800' },
+  resultNote: { color: '#7B8D87', fontSize: 11, marginTop: 4 },
+  sortLabel: { color: '#278F7E', fontSize: 11, fontWeight: '700' },
+  listingCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderColor: '#E8EEEA',
     borderWidth: 1,
     borderRadius: 18,
-    padding: 13,
-    marginTop: 11,
+    padding: 12,
+    marginTop: 10,
   },
-  placeCardPressed: {
-    opacity: 0.75,
-  },
-  placeIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+  listingPressed: { opacity: 0.75 },
+  listingIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  placeEmoji: {
-    fontSize: 25,
-  },
-  placeInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  placeTitleRow: {
+  listingEmoji: { fontSize: 23 },
+  listingInfo: { flex: 1, marginLeft: 11 },
+  listingTopLine: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  placeName: {
+  listingName: {
     color: '#1D4039',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
-    flexShrink: 1,
+    flex: 1,
+    marginRight: 8,
   },
-  exampleBadge: {
-    color: '#287F70',
-    backgroundColor: '#E6F3EE',
-    overflow: 'hidden',
-    borderRadius: 8,
-    paddingHorizontal: 7,
-    paddingVertical: 4,
-    marginLeft: 7,
-    fontSize: 8,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+  distance: { color: '#278F7E', fontSize: 11, fontWeight: '700' },
+  listingKind: {
+    color: '#58736B',
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 3,
   },
-  placeDescription: {
+  listingDescription: {
     color: '#687B74',
-    fontSize: 12,
-    lineHeight: 17,
+    fontSize: 11,
+    lineHeight: 16,
     marginTop: 4,
   },
-  placeCategory: {
-    color: '#278F7E',
-    fontSize: 11,
-    fontWeight: '700',
-    marginTop: 6,
-  },
+  listingProvider: { color: '#88968F', fontSize: 10, marginTop: 5 },
   emptyCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 18,
     marginTop: 12,
   },
-  emptyTitle: {
-    color: '#193D36',
-    fontSize: 15,
-    fontWeight: '800',
-  },
-  emptyText: {
-    color: '#687B74',
-    fontSize: 13,
-    marginTop: 5,
+  emptyTitle: { color: '#193D36', fontSize: 15, fontWeight: '800' },
+  emptyText: { color: '#687B74', fontSize: 12, lineHeight: 18, marginTop: 5 },
+  footerNote: {
+    color: '#7B8D87',
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 18,
   },
   backButton: {
     alignSelf: 'flex-start',
@@ -547,22 +549,16 @@ const styles = StyleSheet.create({
     paddingRight: 12,
     marginBottom: 12,
   },
-  backText: {
-    color: '#278F7E',
-    fontSize: 14,
-    fontWeight: '700',
-  },
+  backText: { color: '#278F7E', fontSize: 14, fontWeight: '700' },
   detailHero: {
-    minHeight: 190,
+    minHeight: 180,
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
   },
-  detailEmoji: {
-    fontSize: 62,
-  },
-  detailBadge: {
+  detailIcon: { fontSize: 60 },
+  demoBadge: {
     color: '#35564F',
     backgroundColor: '#FFFFFFCC',
     overflow: 'hidden',
@@ -574,20 +570,26 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.7,
   },
+  detailKind: {
+    color: '#278F7E',
+    fontSize: 11,
+    fontWeight: '800',
+    marginTop: 20,
+  },
   detailTitle: {
     color: '#173B34',
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 27,
+    lineHeight: 33,
     fontWeight: '800',
-    marginTop: 22,
+    marginTop: 6,
   },
   detailDescription: {
     color: '#64756F',
-    fontSize: 15,
-    lineHeight: 23,
-    marginTop: 7,
+    fontSize: 14,
+    lineHeight: 22,
+    marginTop: 8,
   },
-  infoCard: {
+  detailCard: {
     backgroundColor: '#FFFFFF',
     borderColor: '#E8EEEA',
     borderWidth: 1,
@@ -595,29 +597,24 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 20,
   },
-  infoLabel: {
+  detailLabel: {
     color: '#789088',
     fontSize: 9,
     fontWeight: '800',
     letterSpacing: 1,
+    marginTop: 7,
   },
-  infoValue: {
+  detailValue: {
     color: '#1D4039',
-    fontSize: 15,
-    fontWeight: '800',
-    marginTop: 6,
+    fontSize: 14,
+    fontWeight: '700',
+    marginTop: 4,
   },
-  infoSmall: {
-    color: '#687B74',
-    fontSize: 12,
-    marginTop: 5,
-  },
-  footerNote: {
+  smallNote: {
     color: '#7B8D87',
     fontSize: 11,
-    lineHeight: 16,
+    lineHeight: 17,
     textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 12,
+    marginTop: 18,
   },
 });
