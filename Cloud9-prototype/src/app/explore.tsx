@@ -321,6 +321,7 @@ const feedItems: FeedItem[] = [
 ];
 
 const PREFERENCES_STORAGE_KEY = 'cloud9-demo-preferences';
+
 export default function ForYouScreen() {
   const [selectedPersonaId, setSelectedPersonaId] =
     useState<PersonaId>('lisa');
@@ -329,8 +330,10 @@ export default function ForYouScreen() {
     noor: personas[1].interests,
     milan: personas[2].interests,
   });
-  const [showPreferences, setShowPreferences] = useState(false);
-const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(true);
+  const [hasConfiguredPreferences, setHasConfiguredPreferences] = useState(false);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+
   useEffect(() => {
     let active = true;
 
@@ -342,6 +345,7 @@ const [preferencesLoaded, setPreferencesLoaded] = useState(false);
           const preferences = JSON.parse(saved) as {
             selectedPersonaId?: PersonaId;
             filters?: Partial<Record<PersonaId, Interest[]>>;
+            hasConfiguredPreferences?: boolean;
           };
 
           if (
@@ -358,9 +362,16 @@ const [preferencesLoaded, setPreferencesLoaded] = useState(false);
               milan: preferences.filters?.milan ?? current.milan,
             }));
           }
+
+          if (preferences.hasConfiguredPreferences === true) {
+            setHasConfiguredPreferences(true);
+            setShowPreferences(false);
+          }
+        } else if (active) {
+          setFilters((current) => ({ ...current, lisa: [] }));
         }
       } catch {
-        // Bij ontbrekende of onleesbare opgeslagen voorkeuren gebruiken we de demo-instellingen.
+        // If saved preferences cannot be read, use the demo defaults.
       } finally {
         if (active) {
           setPreferencesLoaded(true);
@@ -382,9 +393,10 @@ const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
     void AsyncStorage.setItem(
       PREFERENCES_STORAGE_KEY,
-      JSON.stringify({ selectedPersonaId, filters }),
+      JSON.stringify({ selectedPersonaId, filters, hasConfiguredPreferences }),
     ).catch(() => {});
-  }, [filters, preferencesLoaded, selectedPersonaId]);
+  }, [filters, hasConfiguredPreferences, preferencesLoaded, selectedPersonaId]);
+
   const selectedPersona = personas.find(
     (persona) => persona.id === selectedPersonaId,
   )!;
@@ -405,16 +417,29 @@ const [preferencesLoaded, setPreferencesLoaded] = useState(false);
     });
   }
 
+  if (!preferencesLoaded) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <View style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
+          <Text style={styles.title}>Cloud9</Text>
+          <Text style={styles.subtitle}>Je interesses worden geladen…</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   if (showPreferences) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ScrollView contentContainerStyle={styles.content}>
-          <Pressable
-            onPress={() => setShowPreferences(false)}
-            style={styles.backButton}
-          >
-            <Text style={styles.backText}>‹  Terug naar Voor jou</Text>
-          </Pressable>
+          {hasConfiguredPreferences && (
+            <Pressable
+              onPress={() => setShowPreferences(false)}
+              style={styles.backButton}
+            >
+              <Text style={styles.backText}>‹  Terug naar Voor jou</Text>
+            </Pressable>
+          )}
 
           <Text style={styles.eyebrow}>INTERESSEFILTER · {selectedPersona.name}</Text>
           <Text style={styles.title}>Wat wil je volgen?</Text>
@@ -459,9 +484,22 @@ const [preferencesLoaded, setPreferencesLoaded] = useState(false);
             bewaard.
           </Text>
 
+          {currentInterests.length === 0 && (
+            <Text style={styles.demoNote}>
+              Kies minstens één interesse om je feed te vullen.
+            </Text>
+          )}
+
           <Pressable
-            onPress={() => setShowPreferences(false)}
-            style={styles.doneButton}
+            disabled={currentInterests.length === 0}
+            onPress={() => {
+              setShowPreferences(false);
+              setHasConfiguredPreferences(true);
+            }}
+            style={[
+              styles.doneButton,
+              currentInterests.length === 0 && { opacity: 0.45 },
+            ]}
           >
             <Text style={styles.doneButtonText}>Klaar</Text>
           </Pressable>
