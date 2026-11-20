@@ -27,13 +27,7 @@ const categories: Filter[] = [
   'Initiatieven',
 ];
 
-const places: {
-  name: string;
-  category: Category;
-  description: string;
-  icon: string;
-  color: string;
-}[] = [
+const places = [
   {
     name: 'Koffiehoek',
     category: 'Eten & drinken',
@@ -69,11 +63,79 @@ const places: {
     icon: '🚲',
     color: '#E8EEF8',
   },
-];
+] satisfies {
+  name: string;
+  category: Category;
+  description: string;
+  icon: string;
+  color: string;
+}[];
+
+type Place = (typeof places)[number];
 
 export default function HomeScreen() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Filter>('Alles');
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+
+  if (selectedPlace) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          <Pressable
+            onPress={() => setSelectedPlace(null)}
+            style={styles.backButton}
+          >
+            <Text style={styles.backText}>‹  Terug naar aanbod</Text>
+          </Pressable>
+
+          <View
+            style={[
+              styles.detailHero,
+              { backgroundColor: selectedPlace.color },
+            ]}
+          >
+            <Text style={styles.detailEmoji}>{selectedPlace.icon}</Text>
+            <Text style={styles.detailBadge}>
+              VOORBEELD · {selectedPlace.category.toUpperCase()}
+            </Text>
+          </View>
+
+          <Text style={styles.detailTitle}>{selectedPlace.name}</Text>
+          <Text style={styles.detailDescription}>
+            {selectedPlace.description}.
+          </Text>
+
+          <View style={styles.infoCard}>
+            <Text style={styles.infoLabel}>TYPE AANBOD</Text>
+            <Text style={styles.infoValue}>{selectedPlace.category}</Text>
+            <Text style={styles.infoSmall}>
+              Dit is voorbeeldinhoud, geen echte aanbieder.
+            </Text>
+          </View>
+
+          <View style={styles.privacyCard}>
+            <View style={styles.privacyIcon}>
+              <Text style={styles.privacyCheck}>✓</Text>
+            </View>
+            <View style={styles.privacyCopy}>
+              <Text style={styles.privacyTitle}>Jij houdt de regie</Text>
+              <Text style={styles.privacyText}>
+                Deze demo gebruikt geen live locatie of persoonlijke gegevens.
+              </Text>
+            </View>
+          </View>
+
+          <Text style={styles.footerNote}>
+            Aanbieders en beschrijvingen zijn voorbeelden voor de demo.
+          </Text>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   const query = search.trim().toLowerCase();
   const visiblePlaces = places.filter((place) => {
@@ -177,7 +239,14 @@ export default function HomeScreen() {
 
         {visiblePlaces.length > 0 ? (
           visiblePlaces.map((place) => (
-            <View key={place.name} style={styles.placeCard}>
+            <Pressable
+              key={place.name}
+              onPress={() => setSelectedPlace(place)}
+              style={({ pressed }) => [
+                styles.placeCard,
+                pressed && styles.placeCardPressed,
+              ]}
+            >
               <View style={[styles.placeIcon, { backgroundColor: place.color }]}>
                 <Text style={styles.placeEmoji}>{place.icon}</Text>
               </View>
@@ -190,7 +259,7 @@ export default function HomeScreen() {
                 <Text style={styles.placeDescription}>{place.description}</Text>
                 <Text style={styles.placeCategory}>{place.category}</Text>
               </View>
-            </View>
+            </Pressable>
           ))
         ) : (
           <View style={styles.emptyCard}>
@@ -245,7 +314,6 @@ const styles = StyleSheet.create({
     color: '#183D36',
     fontSize: 21,
     fontWeight: '800',
-    letterSpacing: -0.5,
   },
   locationPill: {
     marginLeft: 'auto',
@@ -406,6 +474,9 @@ const styles = StyleSheet.create({
     padding: 13,
     marginTop: 11,
   },
+  placeCardPressed: {
+    opacity: 0.75,
+  },
   placeIcon: {
     width: 52,
     height: 52,
@@ -468,6 +539,77 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#687B74',
     fontSize: 13,
+    marginTop: 5,
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 10,
+    paddingRight: 12,
+    marginBottom: 12,
+  },
+  backText: {
+    color: '#278F7E',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  detailHero: {
+    minHeight: 190,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  detailEmoji: {
+    fontSize: 62,
+  },
+  detailBadge: {
+    color: '#35564F',
+    backgroundColor: '#FFFFFFCC',
+    overflow: 'hidden',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginTop: 12,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.7,
+  },
+  detailTitle: {
+    color: '#173B34',
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: '800',
+    marginTop: 22,
+  },
+  detailDescription: {
+    color: '#64756F',
+    fontSize: 15,
+    lineHeight: 23,
+    marginTop: 7,
+  },
+  infoCard: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E8EEEA',
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 16,
+    marginTop: 20,
+  },
+  infoLabel: {
+    color: '#789088',
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  infoValue: {
+    color: '#1D4039',
+    fontSize: 15,
+    fontWeight: '800',
+    marginTop: 6,
+  },
+  infoSmall: {
+    color: '#687B74',
+    fontSize: 12,
     marginTop: 5,
   },
   footerNote: {
