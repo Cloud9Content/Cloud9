@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Pressable,
   ScrollView,
@@ -319,6 +320,7 @@ const feedItems: FeedItem[] = [
   },
 ];
 
+const PREFERENCES_STORAGE_KEY = 'cloud9-demo-preferences';
 export default function ForYouScreen() {
   const [selectedPersonaId, setSelectedPersonaId] =
     useState<PersonaId>('lisa');
@@ -328,7 +330,61 @@ export default function ForYouScreen() {
     milan: personas[2].interests,
   });
   const [showPreferences, setShowPreferences] = useState(false);
+const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+  useEffect(() => {
+    let active = true;
 
+    async function loadPreferences() {
+      try {
+        const saved = await AsyncStorage.getItem(PREFERENCES_STORAGE_KEY);
+
+        if (saved && active) {
+          const preferences = JSON.parse(saved) as {
+            selectedPersonaId?: PersonaId;
+            filters?: Partial<Record<PersonaId, Interest[]>>;
+          };
+
+          if (
+            preferences.selectedPersonaId &&
+            personas.some((persona) => persona.id === preferences.selectedPersonaId)
+          ) {
+            setSelectedPersonaId(preferences.selectedPersonaId);
+          }
+
+          if (preferences.filters) {
+            setFilters((current) => ({
+              lisa: preferences.filters?.lisa ?? current.lisa,
+              noor: preferences.filters?.noor ?? current.noor,
+              milan: preferences.filters?.milan ?? current.milan,
+            }));
+          }
+        }
+      } catch {
+        // Bij ontbrekende of onleesbare opgeslagen voorkeuren gebruiken we de demo-instellingen.
+      } finally {
+        if (active) {
+          setPreferencesLoaded(true);
+        }
+      }
+    }
+
+    void loadPreferences();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!preferencesLoaded) {
+      return;
+    }
+
+    void AsyncStorage.setItem(
+      PREFERENCES_STORAGE_KEY,
+      JSON.stringify({ selectedPersonaId, filters }),
+    ).catch(() => {});
+  }, [filters, preferencesLoaded, selectedPersonaId]);
   const selectedPersona = personas.find(
     (persona) => persona.id === selectedPersonaId,
   )!;
@@ -399,7 +455,7 @@ export default function ForYouScreen() {
           </View>
 
           <Text style={styles.demoNote}>
-            Demo-profielen en voorkeuren worden alleen tijdelijk in de app
+            Je gekozen demo-profiel en interessefilters worden op dit toestel
             bewaard.
           </Text>
 
